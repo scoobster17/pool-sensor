@@ -3,40 +3,43 @@
 // Sketch works on both Photon and Uno...
 // ------------
 
+#include <time.h>
 #include "Arduino/Arduino.h"
 
 #define LOUDNESS_PIN A0
 #define SOUND_PIN D1
 
-// ------------
-#ifdef SPARK_CORE // Particle...
-
-int LED_PIN = D7; // This one is the little blue LED on your board.
-		  // On the Photon it is next to D7, and on the Core it is next to the USB jack.
-
-#else // ... Arduino...
-
-int LED_PIN = 13; // normal LED location on UNO...
-
-#endif
-// ------------
+time_t startTime = 0;
+long accumulator = 0;
+long numSamples = 0;
 
 void setup()
 {
 	Serial.begin(9600);
 
 	pinMode(LOUDNESS_PIN, INPUT);
+	startTime = time(NULL);
 }
 
 void loop()
 {
-	int result = analogRead(LOUDNESS_PIN);
+    time_t currentTime = time(NULL);
 
-	if (result > 700)
-	{
-	    Serial.println(result);
-	    tone(SOUND_PIN, 2000, 250);
-	    delay(50);
-	    noTone(SOUND_PIN);
-	}
+    if (currentTime - startTime > 30)
+    {
+        /* Calculate and send average. */
+        int average = accumulator / numSamples;
+
+
+        /* Reset globals. */
+        accumulator = 0;
+        numSamples = 0;
+        startTime = currentTime;
+    }
+    else
+    {
+        accumulator += analogRead(LOUDNESS_PIN);
+        ++numSamples;
+        delay(50);
+    }
 }
