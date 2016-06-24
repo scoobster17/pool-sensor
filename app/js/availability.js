@@ -20,7 +20,19 @@ pool.availability = (function(){
 		var now = new Date().toString();
 
 		// check if available
-		var available = false;
+		var available = true;
+
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = function() {
+			if (request.readyState == 4 && request.status == 200) {
+				console.log('SUCCESS');
+			} else {
+				console.log('FAIL');
+			}
+		};
+
+		request.open("GET", "https://api.thingspeak.com/channels/127796/feeds.json?results=1&api_key=DKMDO7CTZD4NLFUQ", true);
+		request.send();
 
 		// update page with availability
 		if (available) {
